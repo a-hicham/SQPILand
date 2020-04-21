@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 
@@ -39,7 +39,7 @@ namespace SqpiLand
         {
             DBList.Items.Clear();
             bool msTrusted = (bool) MSDB.IsChecked && (bool) TrustedCheckBox.IsChecked;
-            dbConn = ConnFactory.createConnection((bool)OracleDB.IsChecked ? "Oracle" : "MSSQL", ServerText.Text, (bool)OracleDB.IsChecked ? null : InitialDBText.Text, msTrusted, !msTrusted ? UsernameText.Text : null, !msTrusted ? PasswordText.Password : null, PortText.Text, SIDText.Text);
+            dbConn = ConnFactory.createConnection((bool)OracleDB.IsChecked ? "Oracle" : (bool)MSDB.IsChecked ? "MSSQL" : "PostgreSQL", ServerText.Text, (bool)OracleDB.IsChecked ? null : (bool)MSDB.IsChecked ? InitialDBText.Text : PostgreSQLDB.Text, msTrusted, !msTrusted ? UsernameText.Text : null, !msTrusted ? PasswordText.Password : null, (bool)OracleDB.IsChecked ? PortText.Text : (bool)MSDB.IsChecked ? "" : PortPostgreSQL.Text, SIDText.Text);
 
             //dbConn = OracleConn.GetInstance(ServerText.Text, PortText.Text, SIDText.Text, UsernameText.Text, PasswordText.Text);
             //DBList.Items.Add(ServerText.Text);
@@ -56,8 +56,7 @@ namespace SqpiLand
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            myModel = dbConn.BuildModel(DBList.SelectedItem.ToString(), (bool)WithHistory.IsChecked);
-            VisioDrawer.DrawModel(myModel,(bool)ViewsCheckbox.IsChecked, (bool)ShowVisio.IsChecked, OutputFolder.Text, (bool)physNames.IsChecked, (bool)AllFieldsCheckbox.IsChecked);
+            VisioDrawer.DrawModel(createModel(), (bool)ViewsCheckbox.IsChecked, (bool)ShowVisio.IsChecked, OutputFolder.Text, (bool)physNames.IsChecked, (bool)AllFieldsCheckbox.IsChecked);
         }
 
         private void TrustedCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -81,6 +80,18 @@ namespace SqpiLand
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private Model.DBModel createModel()
+        {
+            return dbConn.BuildModel(DBList.SelectedItem.ToString(), (bool)WithHistory.IsChecked);
+        }
+
+        private void XML_Export_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            myModel = createModel();
+            XElement elements = Tools.Utils.ModelToXML(myModel);
+            elements.Save(@"C:\Visio\" + myModel.serverName + ".xml");
         }
     }
 }

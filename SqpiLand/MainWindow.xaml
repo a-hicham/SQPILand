@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SqpiLand"
         mc:Ignorable="d"
-        Title="MainWindow" Height="665" Width="772.036">
+        Title="MainWindow" Height="665" Width="1094.036">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
@@ -14,55 +14,65 @@
         <Button Content="Meta DBs auslesen" HorizontalAlignment="Left" Margin="114,240,0,0" VerticalAlignment="Top" Width="150" Click="Button_Click" KeyboardNavigation.TabIndex="8"/>
         <Label Content="Server" HorizontalAlignment="Left" Margin="148,131,0,0" VerticalAlignment="Top"/>
         <ListBox x:Name="DBList" HorizontalAlignment="Left" Height="309" Margin="33,267,0,0" VerticalAlignment="Top" Width="305" KeyboardNavigation.TabIndex="9"/>
-        <TextBox x:Name="ServerText" HorizontalAlignment="Left" Height="23" Margin="196,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128" TextChanged="ConnStringText_TextChanged" AutomationProperties.IsRequiredForForm="True" KeyboardNavigation.TabIndex="2"/>
-        <CheckBox x:Name="TrustedCheckBox" Content="Trusted (MSSQL)" HorizontalAlignment="Left" Margin="581,181,0,0" VerticalAlignment="Top" Checked="TrustedCheckBox_Checked" IsEnabled="{Binding IsChecked, ElementName=MSDB}" KeyboardNavigation.TabIndex="5" Width="112" Height="19"/>
+        <TextBox x:Name="ServerText" HorizontalAlignment="Left" Height="23" Margin="196,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="192" TextChanged="ConnStringText_TextChanged" AutomationProperties.IsRequiredForForm="True" KeyboardNavigation.TabIndex="2"/>
+        <CheckBox x:Name="TrustedCheckBox" Content="Trusted" HorizontalAlignment="Left" Margin="682,181,0,0" VerticalAlignment="Top" Checked="TrustedCheckBox_Checked" IsEnabled="{Binding IsChecked, ElementName=MSDB}" KeyboardNavigation.TabIndex="5" Width="112" Height="19"/>
         <Image HorizontalAlignment="Left" Height="55" Margin="10,10,0,0" VerticalAlignment="Top" Width="221" Source="Files/256px-Scopeland-Logo.png"/>
-        <Button Content="ER Diagram zeichnen" HorizontalAlignment="Left" Margin="426,556,0,0" VerticalAlignment="Top" Width="270" Click="Button_Click_1" IsEnabled="{Binding SelectedItem, ElementName=DBList, Mode=OneWay}" KeyboardNavigation.TabIndex="13"/>
+        <Button Content="Diagram zeichnen" HorizontalAlignment="Left" Margin="592,556,0,0" VerticalAlignment="Top" Width="150" Click="Button_Click_1" IsEnabled="{Binding SelectedItem, ElementName=DBList, Mode=OneWay}" KeyboardNavigation.TabIndex="13"/>
         <Label Content="Username" HorizontalAlignment="Left" Margin="126,160,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="UsernameText" HorizontalAlignment="Left" Height="23" Margin="196,163,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128" KeyboardNavigation.TabIndex="3"/>
+        <TextBox x:Name="UsernameText" HorizontalAlignment="Left" Height="23" Margin="196,163,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="192" KeyboardNavigation.TabIndex="3" x:FieldModifier="public"/>
         <Label Content="Password" HorizontalAlignment="Left" Margin="131,191,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="MSDB" Content="MSSQL" HorizontalAlignment="Left" Margin="36,176,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="0" RenderTransformOrigin="0.509,2.4"/>
-        <RadioButton x:Name="OracleDB" Content="Oracle" HorizontalAlignment="Left" Margin="36,156,0,0" VerticalAlignment="Top" IsChecked="True" KeyboardNavigation.TabIndex="1"/>
-        <GroupBox x:Name="TechBox" Header="Datenbank" HorizontalAlignment="Left" Height="63" Margin="26,134,0,0" VerticalAlignment="Top" Width="96"/>
-        <TextBox x:Name="SIDText" HorizontalAlignment="Left" Height="23" Margin="369,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="6"/>
-        <TextBox x:Name="PortText" HorizontalAlignment="Left" Height="23" Margin="369,179,0,0" TextWrapping="Wrap" Text="1521" VerticalAlignment="Top" Width="52" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="7"/>
-        <Label Content="SID" HorizontalAlignment="Left" Margin="333,145,0,0" VerticalAlignment="Top" Width="31" RenderTransformOrigin="0.521,0.268"/>
-        <Label Content="Port" HorizontalAlignment="Left" Margin="332,175,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="ViewsCheckbox" Content="Views anzeigen" HorizontalAlignment="Left" Margin="589,478,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="12"/>
-        <GroupBox x:Name="Oracle_DB" Header="Oracle Einstellungen" HorizontalAlignment="Left" Height="82" Margin="333,131,0,0" VerticalAlignment="Top" Width="181"/>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="3" Margin="26,223,0,0" VerticalAlignment="Top" Width="714"/>
-        <TextBlock HorizontalAlignment="Left" Margin="33,83,0,0" TextWrapping="Wrap" Text="SQPILand baut ein ER Datenmodell aus der ausgewählten META-DB. Dazu bitte die entsprechenden Einstellungen vornehmen." VerticalAlignment="Top" Height="24" Width="702"/>
-        <CheckBox x:Name="WithHistory" Content="Historientabellen anzeigen" HorizontalAlignment="Left" Margin="589,498,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="13" Width="160"/>
-        <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="196,191,0,0" VerticalAlignment="Top" Width="128" Height="22" KeyboardNavigation.TabIndex="4"/>
-        <CheckBox x:Name="ShowVisio" Content="Visio anzeigen" HorizontalAlignment="Left" Margin="427,538,0,0" VerticalAlignment="Top" IsChecked="True" KeyboardNavigation.TabIndex="14" Width="127"/>
+        <RadioButton x:Name="MSDB" Content="MSSQL" HorizontalAlignment="Left" Margin="33,170,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="0" RenderTransformOrigin="0.509,2.4"/>
+        <RadioButton x:Name="OracleDB" Content="Oracle" HorizontalAlignment="Left" Margin="33,150,0,0" VerticalAlignment="Top" IsChecked="True" KeyboardNavigation.TabIndex="1"/>
+        <RadioButton x:Name="PostgreSQL" Content="PostgreSQL" HorizontalAlignment="Left" Margin="33,191,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="0" RenderTransformOrigin="0.509,2.4"/>
+        <GroupBox x:Name="TechBox" Header="Datenbank" HorizontalAlignment="Left" Height="83" Margin="25,130,0,0" VerticalAlignment="Top" Width="96"/>
+        <TextBox x:Name="SIDText" HorizontalAlignment="Left" Height="23" Margin="449,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="6"/>
+        <TextBox x:Name="PortText" HorizontalAlignment="Left" Height="23" Margin="449,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="52" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="7"/>
+        <Label Content="SID" HorizontalAlignment="Left" Margin="413,145,0,0" VerticalAlignment="Top" Width="31" RenderTransformOrigin="0.521,0.268"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="412,175,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="ViewsCheckbox" Content="Views anzeigen" HorizontalAlignment="Left" Margin="579,460,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="12"/>
+        <GroupBox x:Name="Oracle_DB" Header="Oracle Einstellungen" HorizontalAlignment="Left" Height="83" Margin="412,130,0,0" VerticalAlignment="Top" Width="181"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="3" Margin="10,223,0,0" VerticalAlignment="Top" Width="1060"/>
+        <TextBlock HorizontalAlignment="Left" Margin="33,83,0,0" TextWrapping="Wrap" Text="SQPILand baut ein ER Datenmodell aus der ausgewählten META-DB. Dazu bitte die entsprechenden Einstellungen vornehmen." VerticalAlignment="Top" Height="24" Width="1018"/>
+        <CheckBox x:Name="WithHistory" Content="Historientabellen anzeigen" HorizontalAlignment="Left" Margin="579,480,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="13" Width="160"/>
+        <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="196,191,0,0" VerticalAlignment="Top" Width="192" Height="22" KeyboardNavigation.TabIndex="4"/>
+        <CheckBox x:Name="ShowVisio" Content="Visio anzeigen" HorizontalAlignment="Left" Margin="417,520,0,0" VerticalAlignment="Top" IsChecked="True" KeyboardNavigation.TabIndex="14" Width="127"/>
         <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="345" Margin="385,231,0,0" VerticalAlignment="Top" Width="3"/>
-        <TextBox x:Name="OutputFolder" HorizontalAlignment="Left" Height="23" Margin="512,350,0,0" TextWrapping="Wrap" Text="C:\VISIO\" VerticalAlignment="Top" Width="206" IsEnabled="False"/>
-        <Label Content="Speichern in" HorizontalAlignment="Left" Margin="423,346,0,0" VerticalAlignment="Top" Width="89"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="483,260,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="235" IsEnabled="False"/>
-        <Label Content="SEF Pfad" HorizontalAlignment="Left" Margin="423,257,0,0" VerticalAlignment="Top" Width="60"/>
-        <CheckBox Content="Import von SEF" HorizontalAlignment="Left" Margin="423,242,0,0" VerticalAlignment="Top" IsEnabled="False"/>
-        <CheckBox Content="Import von XML" HorizontalAlignment="Left" Margin="423,293,0,0" VerticalAlignment="Top" Width="124" IsEnabled="False"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="483,313,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="235" IsEnabled="False"/>
-        <Label Content="XML Pfad" HorizontalAlignment="Left" Margin="423,313,0,0" VerticalAlignment="Top"/>
-        <Label Content="© Scopeland Technology GmbH 2018" HorizontalAlignment="Center" Margin="540,592,10,10" VerticalAlignment="Center" Width="214" Opacity="0.5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="32"/>
-
-
-        <GroupBox Header="Tabellen/Felder Namen" HorizontalAlignment="Left" Height="60" Margin="411,473,0,0" VerticalAlignment="Top" Width="165"/>
-        <StackPanel HorizontalAlignment="Left" Height="32" Margin="440,493,0,0" VerticalAlignment="Top" Width="94">
+        <TextBox x:Name="OutputFolder" HorizontalAlignment="Left" Height="23" Margin="857,345,-6,0" TextWrapping="Wrap" Text="C:\VISIO\" VerticalAlignment="Top" Width="206" IsEnabled="False"/>
+        <Label Content="Speichern in" HorizontalAlignment="Left" Margin="768,341,0,0" VerticalAlignment="Top" Width="89"/>
+        <TextBox x:Name="XML_Export_Path_Text1" HorizontalAlignment="Left" Height="23" Margin="828,255,-6,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="235" IsEnabled="{Binding IsChecked, ElementName=XML_Export_Checkbox}"/>
+        <Label x:Name="XML_Export_Path_Text" Content="XML Pfad" HorizontalAlignment="Left" Margin="768,252,0,0" VerticalAlignment="Top" Width="60"/>
+        <CheckBox x:Name="XML_Export_Checkbox" Content="XML Export" HorizontalAlignment="Left" Margin="768,237,0,0" VerticalAlignment="Top" IsEnabled="{Binding Items.Count, ElementName=DBList, Mode=OneWay}"/>
+        <CheckBox Content="Import von XML" HorizontalAlignment="Left" Margin="768,288,0,0" VerticalAlignment="Top" Width="124" IsEnabled="False"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="828,308,-6,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="235" IsEnabled="False"/>
+        <Label Content="XML Pfad" HorizontalAlignment="Left" Margin="768,308,0,0" VerticalAlignment="Top"/>
+        <Label Content="© Scopeland Technology GmbH 2020" HorizontalAlignment="Center" Margin="828,592,22,10" VerticalAlignment="Center" Width="230" Opacity="0.5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="32"/>
+        <GroupBox Header="Tabellen/Felder Namen" HorizontalAlignment="Left" Height="60" Margin="401,455,0,0" VerticalAlignment="Top" Width="165"/>
+        <StackPanel HorizontalAlignment="Left" Height="32" Margin="430,475,0,0" VerticalAlignment="Top" Width="94">
             <RadioButton x:Name="physNames" Content="Physisch" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" IsChecked="True" KeyboardNavigation.TabIndex="10"/>
             <RadioButton x:Name="logicNames" Content="Logisch" VerticalAlignment="Center" HorizontalAlignment="Right" Width="94" KeyboardNavigation.TabIndex="10"/>
         </StackPanel>
-        <CheckBox x:Name="AllFieldsCheckbox" Content="Alle Felder anzeigen" HorizontalAlignment="Left" Margin="589,518,0,0" VerticalAlignment="Top" Width="139"/>
+        <CheckBox x:Name="AllFieldsCheckbox" Content="Alle Felder anzeigen" HorizontalAlignment="Left" Margin="579,500,0,0" VerticalAlignment="Top" Width="139"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,584,0,0" TextWrapping="Wrap" Text="{Binding Version}" VerticalAlignment="Top" Width="328"/>
-        <TextBox x:Name="InitialDBText" HorizontalAlignment="Left" Height="23" Margin="581,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" IsEnabled="{Binding IsChecked, ElementName=MSDB}"/>
-        <Label Content="Instance" HorizontalAlignment="Left" Margin="519,148,0,0" VerticalAlignment="Top"/>
-        <GroupBox Header="MSSQL Einstellungen" HorizontalAlignment="Left" Height="82" Margin="519,131,0,0" VerticalAlignment="Top" Width="221"/>
-        <GroupBox Header="Fokus" HorizontalAlignment="Left" Height="98" Margin="411,375,0,0" VerticalAlignment="Top" Width="329"/>
-        <CheckBox x:Name="Fokus_Aktiv" Content="Fokus aktivieren" HorizontalAlignment="Left" Margin="423,397,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="Fokus_Tabelle" HorizontalAlignment="Left" Height="23" Margin="576,415,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="142" IsEnabled="{Binding IsChecked, ElementName=Fokus_Aktiv}"/>
-        <Label Content="Ausschnittsfokus-Tabelle" HorizontalAlignment="Left" Margin="423,412,0,0" VerticalAlignment="Top" Width="153"/>
-        <Label Content="Ausschnittsfokus-Tiefe" HorizontalAlignment="Left" Margin="423,438,0,0" VerticalAlignment="Top" Width="153"/>
-        <TextBox x:Name="Fokus_Tiefe" HorizontalAlignment="Left" Height="23" Margin="576,441,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="142" PreviewTextInput="NumberValidationTextBox" IsEnabled="{Binding IsChecked, ElementName=Fokus_Aktiv}"/>
+        <TextBox x:Name="InitialDBText" HorizontalAlignment="Left" Height="23" Margin="682,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" IsEnabled="{Binding IsChecked, ElementName=MSDB}"/>
+        <Label Content="Instance" HorizontalAlignment="Left" Margin="620,148,0,0" VerticalAlignment="Top"/>
+        <GroupBox Header="MSSQL Einstellungen" HorizontalAlignment="Left" Height="83" Margin="620,130,0,0" VerticalAlignment="Top" Width="208"/>
+        <GroupBox Header="Fokus" HorizontalAlignment="Left" Height="98" Margin="401,236,0,0" VerticalAlignment="Top" Width="329"/>
+        <CheckBox x:Name="Fokus_Aktiv" Content="Fokus aktivieren" HorizontalAlignment="Left" Margin="413,258,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="Fokus_Tabelle" HorizontalAlignment="Left" Height="23" Margin="566,276,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="142" IsEnabled="{Binding IsChecked, ElementName=Fokus_Aktiv}"/>
+        <Label Content="Ausschnittsfokus-Tabelle" HorizontalAlignment="Left" Margin="413,273,0,0" VerticalAlignment="Top" Width="153"/>
+        <Label Content="Ausschnittsfokus-Tiefe" HorizontalAlignment="Left" Margin="413,299,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBox x:Name="Fokus_Tiefe" HorizontalAlignment="Left" Height="23" Margin="566,302,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="142" PreviewTextInput="NumberValidationTextBox" IsEnabled="{Binding IsChecked, ElementName=Fokus_Aktiv}"/>
+        <Button x:Name="XML_Export_Btn" Content="XML Export" HorizontalAlignment="Left" Margin="913,556,0,0" VerticalAlignment="Top" Width="150" Click="XML_Export_Btn_Click"/>
+        <TextBox x:Name="PostgreSQLDB" HorizontalAlignment="Left" Height="23" Margin="916,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" IsEnabled="{Binding IsChecked, ElementName=PostgreSQL}"/>
+        <Label Content="Database" HorizontalAlignment="Left" Margin="852,148,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="PortPostgreSQL" HorizontalAlignment="Left" Height="23" Margin="916,179,0,0" TextWrapping="Wrap" Text="5432" VerticalAlignment="Top" Width="52" IsEnabled="{Binding IsChecked, ElementName=PostgreSQL}"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="852,173,0,0" VerticalAlignment="Top"/>
+        <GroupBox Header="PostgreSQL Einstellungen" HorizontalAlignment="Left" Height="83" Margin="852,130,0,0" VerticalAlignment="Top" Width="206"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="345" Margin="750,231,0,0" VerticalAlignment="Top" Width="3"/>
+        <TextBox x:Name="Table_Blacklist_Text" HorizontalAlignment="Left" Height="23" Margin="413,362,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="305"/>
+        <GroupBox Header="Tabellen Blacklist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,340,0,0" VerticalAlignment="Top" Width="329"/>
+        <TextBox x:Name="Table_Whitelist_Text" HorizontalAlignment="Left" Height="23" Margin="413,415,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="305"/>
+        <GroupBox Header="Tabellen Whitelist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,393,0,0" VerticalAlignment="Top" Width="329"/>
 
     </Grid>
 </Window>

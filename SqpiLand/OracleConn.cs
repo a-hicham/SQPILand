@@ -17,7 +17,7 @@ namespace SqpiLand
 
         private static DbProviderFactory _dbFactory;
         private static OracleConn instance = null;
-        private static OracleConnection conn;
+        private static DbConnection conn;
         private static ConnectionStringBuilderOracle connStringBuilder;
         //private static string user = null;
         //private static string pw = null;
@@ -96,7 +96,7 @@ namespace SqpiLand
             return TablesList;
         }
 
-        public DBModel BuildModel(string dbName, bool withHostory)
+        public DBModel BuildModel(string dbName, bool withHistory)
         {
             string command;
             OracleCommand sqlCommand;
@@ -110,26 +110,27 @@ namespace SqpiLand
             List<Relation> myRelations = new List<Relation>();
             HashSet<Field> relFields = new HashSet<Field>();
 
-            connStringBuilder.Username = dbName;
-            connStringBuilder.Password = dbName;
+            connStringBuilder.Username = ((MainWindow)Application.Current.MainWindow).UsernameText.Text;
+            connStringBuilder.Password = ((MainWindow)Application.Current.MainWindow).PasswordText.Password;
+           
             conn = GetConnection();
 
             //string connString = "Server=" + serverName + ";Database=" + dbName + ";Trusted_Connection=" + trusted.ToString() + (trusted ? ";" : ";User Id=" + user + ";Password=" + pw + ";");
             //SqlConnection dbConn = new SqlConnection(connString);
             conn.Open();
 
-            command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
-            sqlCommand = new OracleCommand(command, conn);
+            command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + "." + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
+            sqlCommand = new OracleCommand(command, (OracleConnection)conn);
             sqlAdapter = new OracleDataAdapter(sqlCommand);
             sqlAdapter.Fill(dataTables);
 
-            command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + DWFIELDS;
-            sqlCommand = new OracleCommand(command, conn);
+            command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + "." + DWFIELDS;
+            sqlCommand = new OracleCommand(command, (OracleConnection)conn);
             sqlAdapter = new OracleDataAdapter(sqlCommand);
             sqlAdapter.Fill(dataFields);
 
-            command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + DWRELATIONS;
-            sqlCommand = new OracleCommand(command, conn);
+            command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + "." + DWRELATIONS;
+            sqlCommand = new OracleCommand(command, (OracleConnection)conn);
             sqlAdapter = new OracleDataAdapter(sqlCommand);
             sqlAdapter.Fill(dataRelations);
 
@@ -138,7 +139,7 @@ namespace SqpiLand
 
             foreach (DataRow row in dataTables.Rows)
             {
-                if (withHostory || !row[2].ToString().StartsWith(@"Änderungshistorie zu:"))
+                if (withHistory || !row[2].ToString().StartsWith(@"Änderungshistorie zu:"))
                     myTables.Add(new Table(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString()));
             }
 

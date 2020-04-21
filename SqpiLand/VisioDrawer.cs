@@ -114,8 +114,22 @@ namespace SqpiLand
                         TablesToLeaveList.AddRange(tablesListTemp);
                     }
 
+
                     model.TablesList.RemoveAll(table => !TablesToLeaveList.Contains(table));
                 }
+                /***************************************************************************/
+
+                /***************************************************************************
+                * ****************************** Black/Whitelists ************************************
+                ***************************************************************************/
+                List<string> tableBlacklist = new List<string>(((MainWindow)Application.Current.MainWindow).Table_Blacklist_Text.Text.Trim().Split(','));
+                List<string> tableWhitelist = new List<string>(((MainWindow)Application.Current.MainWindow).Table_Whitelist_Text.Text.Trim().Split(','));
+
+                if (tableBlacklist.Count > 0 && !tableBlacklist[0].Equals(""))
+                    model.TablesList.RemoveAll(table => tableBlacklist.Contains(table.Name));
+
+                if (tableWhitelist.Count > 0 && !tableWhitelist[0].Equals(""))
+                    model.TablesList.RemoveAll(table => !tableWhitelist.Contains(table.Name));
                 /***************************************************************************/
 
                 foreach (Table table in model.TablesList)

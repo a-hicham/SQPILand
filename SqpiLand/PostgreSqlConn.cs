@@ -4,18 +4,19 @@ using System.Windows;
 using System.Data;
 using System.Collections.Generic;
 using System.Data.Common;
+using Npgsql;
 using SqpiLand.Model;
 using Oracle.ManagedDataAccess.Client;
 
 namespace SqpiLand
 {
-    class DBConn : IConnectionObject
+    class PostgreSqlConn : IConnectionObject
     {
-        private static readonly string DWTABLEOBJECTS = "DWTABLEOBJECTS";
-        private static readonly string DWFIELDS = "DWFIELDS";
-        private static readonly string DWRELATIONS = "DWRELATIONS";
+        private static readonly string DWTABLEOBJECTS = ".DWTABLEOBJECTS";
+        private static readonly string DWFIELDS = ".DWFIELDS";
+        private static readonly string DWRELATIONS = ".DWRELATIONS";
 
-        private static DBConn instance = null;
+        private static PostgreSqlConn instance = null;
         private static DbConnection conn;
         private static DbConnectionStringBuilder dbConnStringBuilder = new DbConnectionStringBuilder();
         private static string serverName;
@@ -28,27 +29,27 @@ namespace SqpiLand
         private static DataTable dataFields;
         private static DataTable dataRelations;
 
-        private DBConn()
+        private PostgreSqlConn()
         { }
 
-        public static DBConn GetInstance(string server, string initialDB, bool trustedState, string username, string password, DbProviderFactory provider)
+        public static PostgreSqlConn GetInstance(string server, string port, string initialDB, string username, string password)
         {
             if (instance == null)
-                instance = new DBConn();
+                instance = new PostgreSqlConn();
 
             serverName = server;
-            if(null != initialDB)
+            if (null != initialDB)
                 initDB = initialDB;
-            trusted = trustedState;
+            //trusted = trustedState;
             user = username;
             pw = password;
-            
+
             try
             {
                 //connString = @"Server=" + server + (initDB != null ? @"\" + initDB : "") + ";Trusted_Connection=" + trusted + (trusted ? "" : ";User Id=" + user + ";Password=" + pw) + ";";
-                connString = @"Server=" + server + (initDB != null ? @";DataBase=" + initDB : "") + ";Trusted_Connection=" + trusted + (trusted ? "" : ";User Id=" + user + ";Password=" + pw) + ";";
+                connString = @"Server=" + server + @";DataBase=" + initDB + ";User Id=" + user + ";Password=" + pw + ";Port=" + port + ";";
                 dbConnStringBuilder.ConnectionString = connString;
-                conn = new SqlConnection(connString);
+                conn = new NpgsqlConnection(connString);
             }
             catch (ArgumentException e)
             {
@@ -62,7 +63,7 @@ namespace SqpiLand
             return instance;
         }
 
-        public IList<string> GetMetaDatabases ()
+        public IList<string> GetMetaDatabases()
         {
             //*******************************//
             //ToDo: MetaDBs aus EntryDB holen//
@@ -73,18 +74,21 @@ namespace SqpiLand
             {
                 conn.Open();
                 DataTable DBs = conn.GetSchema("Databases");
-                SqlConnection dbConn;
+                DbConnection dbConn;
                 foreach (DataRow db in DBs.Rows)
                 {
-                    var dbConnString = "Server=" + serverName + ";Database=" + db[0] + ";Trusted_Connection=" + trusted + (trusted ? "" : ";User Id=" + user + ";Password=" + pw) + ";";
-                    dbConn = new SqlConnection(dbConnString);
-                    dbConn.Open();
-                    DataTable Tables = dbConn.GetSchema("Tables");
-                    foreach (DataRow table in Tables.Rows)
-                        if (table[2].ToString().Equals("massages") && !TablesList.Contains(table[0].ToString()))
-                            TablesList.Add(table[0].ToString());
-                    dbConn.Close();
-                    dbConn.Dispose();
+                    if (initDB.Equals(db[0]))
+                    {
+                        var dbConnString = "Server=" + serverName + ";Database=" + db[0] + ";User Id=" + user + ";Password=" + pw + ";";
+                        dbConn = new NpgsqlConnection(dbConnString);
+                        dbConn.Open();
+                        DataTable Tables = dbConn.GetSchema("Tables");
+                        foreach (DataRow table in Tables.Rows)
+                            if (table[2].ToString().Equals("massages") && !TablesList.Contains(table[0].ToString()))
+                                TablesList.Add(table[1].ToString());
+                        dbConn.Close();
+                        dbConn.Dispose();
+                    }
                 }
             }
             catch (Exception e)
@@ -115,74 +119,54 @@ namespace SqpiLand
             FieldComparer fieldComparer = new FieldComparer();
             List<Relation> myRelations = new List<Relation>();
             HashSet<Field> relFields = new HashSet<Field>();
-            /*
+
             int k = 0;
             foreach (Field f in myFields)
             {
                 k++;
             }
-            */
-            string connString = "Server=" + serverName + ";Database=" + dbName + ";Trusted_Connection=" + trusted + (trusted ? ";" : ";User Id=" + user + ";Password=" + pw + ";");
-            SqlConnection dbConn = new SqlConnection(connString);
+
+            string connString = "Server=" + serverName + ";Database=" + initDB + ";User Id=" + user + ";Password=" + pw + ";";
+            DbConnection dbConn = new NpgsqlConnection(connString);
             try
             {
                 dbConn.Open();
-                DataTable tables = dbConn.GetSchema("Tables");
-                string schema = ".dbo.";
 
-                foreach(DataRow row in tables.Rows)
-                {
-                    if (row[2].ToString().ToLower().Equals(DWTABLEOBJECTS.ToLower()))
-                    {
-                        schema = "." + row[1].ToString() + ".";
-                        break;
-                    }
-                }
-
-                command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + initDB + schema + 
-                          DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
-                sqlCommand = new SqlCommand(command, dbConn);
-                if (1 == 1)
-                    sqlAdapter = new SqlDataAdapter((SqlCommand) sqlCommand);
-                else
-                {
-                    sqlAdapter = new OracleDataAdapter((OracleCommand) sqlCommand);
-                }
+                command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
+                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
+                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
 
                 sqlAdapter.Fill(dataTables);
 
-                command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + initDB + schema + 
-                          DWFIELDS;
-                sqlCommand = new SqlCommand(command, dbConn);
-                sqlAdapter = new SqlDataAdapter((SqlCommand) sqlCommand);
+                command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + DWFIELDS;
+                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
+                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
                 sqlAdapter.Fill(dataFields);
 
-                command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + initDB + schema + DWRELATIONS;
-                sqlCommand = new SqlCommand(command, dbConn);
-                sqlAdapter = new SqlDataAdapter((SqlCommand) sqlCommand);
+                command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + DWRELATIONS;
+                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
+                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
                 sqlAdapter.Fill(dataRelations);
             }
 
             catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            { }
             finally
             {
                 dbConn.Close();
                 dbConn.Dispose();
             }
 
-            foreach(DataRow row in dataTables.Rows)
+            foreach (DataRow row in dataTables.Rows)
             {
                 if (withHostory || !row[2].ToString().StartsWith(@"Änderungshistorie zu:"))
                     myTables.Add(new Table(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString()));
             }
 
-            foreach(DataRow row in dataFields.Rows)
+            foreach (DataRow row in dataFields.Rows)
             {
                 var myTable = myTables.Find(table => table.Id == Convert.ToInt32(row[3]));
-                if(myTable != null)
+                if (myTable != null)
                 {
                     var myField = new Field(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), myTable, Convert.ToInt32(row[3].ToString()));
                     myTable.Fields.Add(myField);
@@ -191,7 +175,7 @@ namespace SqpiLand
                 myTable?.Fields.Sort(fieldComparer);
             }
 
-            foreach(DataRow row in dataRelations.Rows)
+            foreach (DataRow row in dataRelations.Rows)
             {
                 var myFieldFrom = myFields.Find(field => field.Id == Convert.ToInt32(row[1]));
                 var myFieldTo = myFields.Find(field => field.Id == Convert.ToInt32(row[2]));
@@ -213,7 +197,8 @@ namespace SqpiLand
                 }
             }
 
-            return new DBModel(dbName ,myTables, myRelations, relFields);
+            return new DBModel(dbName, myTables, myRelations, relFields);
         }
+
     }
 }

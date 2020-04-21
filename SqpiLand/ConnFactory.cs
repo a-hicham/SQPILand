@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Npgsql;
 
 namespace SqpiLand
 {
     class ConnFactory
     {
-        private readonly static Dictionary<string, string> providers = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> providers = new Dictionary<string, string>()
             {
                 { "MSSQL", "System.Data.SqlClient" },
                 { "Oracle", "System.Data.OracleClient" }
@@ -21,6 +19,9 @@ namespace SqpiLand
         //}
         internal static IConnectionObject createConnection(string provider, string server, string initDB, bool trusted, string username, string password, string port, string sid)
         {
+            if (provider.Equals("PostgreSQL"))
+                return PostgreSqlConn.GetInstance(server, port, initDB, username, password);
+
             dbFactory = System.Data.Common.DbProviderFactories.GetFactory(providers[provider]);
             if(provider.Equals("Oracle"))
             {
