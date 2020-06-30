@@ -1,15 +1,11 @@
 ﻿namespace SqpiLand.Model
 
 {
-    class ConnectionStringBuilderMSSQL : ConnectionStringBuilderBase
+    internal class ConnectionStringBuilderMSSQL : ConnectionStringBuilderBase
     {
-        private string port = null;
-        private string sid = null;
-        private bool? trusted = null;
-
-        public string Port { get => port; set => port = value; }
-        public string Sid { get => sid; set => sid = value; }
-        public bool? Trusted { get => trusted; set => trusted = value; }
+        public string Port { get; set; } = null;
+        public string Sid { get; set; } = null;
+        public bool? Trusted { get; set; } = null;
 
         /// <exception cref="ConnectionStringBuilderException">Parameter passen nicht</exception>
         public ConnectionStringBuilderMSSQL(string server, string baseDB, string username, string password, string port, string sid, bool? trusted)
@@ -17,7 +13,7 @@
         {
             if (trusted != null)
             {
-                base.Art = DBArts.MSSQL;
+                Art = DBArts.MSSQL;
                 Trusted = trusted;
             }
             else
@@ -34,6 +30,7 @@
         }
 
         /// <exception cref="ConnectionStringBuilderException">Parameter passen nicht</exception>
+        [System.Obsolete]
         public string getConnectionString()
         {
             string connString = null;
@@ -42,12 +39,11 @@
             {
                 System.Data.Common.DbConnectionStringBuilder dbConnStringBuilder = new System.Data.Common.DbConnectionStringBuilder();
                 connString = @"Server=" + Server + ";Initial Catalog=" + BaseDB + ";Trusted_Connection=" + Trusted.ToString() + ((bool)Trusted ? "" : ";User Id=" + Username + ";Password=" + Password) + ";";
-
                 try
                 {
                     dbConnStringBuilder.ConnectionString = connString;
                 }
-                catch (System.ArgumentException e)
+                catch (System.ArgumentException)
                 {
                     throw new ConnectionStringBuilderException();
                 }
@@ -61,7 +57,7 @@
                 {
                     dbConnStringBuilder.ConnectionString = connString;
                 }
-                catch (System.ArgumentException e)
+                catch (System.ArgumentException)
                 {
                     throw new ConnectionStringBuilderException();
                 }

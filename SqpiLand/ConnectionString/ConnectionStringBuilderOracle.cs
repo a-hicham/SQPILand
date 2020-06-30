@@ -3,13 +3,9 @@
 {
     class ConnectionStringBuilderOracle : ConnectionStringBuilderBase
     {
-        private string port = null;
-        private string sid = null;
-        private bool? trusted = null;
-
-        public string Port { get => port; set => port = value; }
-        public string Sid { get => sid; set => sid = value; }
-        public bool? Trusted { get => trusted; set => trusted = value; }
+        public string Port { get; set; } = null;
+        public string Sid { get; set; } = null;
+        public bool? Trusted { get; set; } = null;
 
         /// <exception cref="ConnectionStringBuilderException">Parameter passen nicht</exception>
         public ConnectionStringBuilderOracle(string server, string baseDB, string username, string password, string port, string sid, bool? trusted)
@@ -47,7 +43,7 @@
                 {
                     dbConnStringBuilder.ConnectionString = connString;
                 }
-                catch (System.ArgumentException e)
+                catch (System.ArgumentException)
                 {
                     throw new ConnectionStringBuilderException();
                 }
@@ -61,7 +57,7 @@
                 {
                     dbConnStringBuilder.ConnectionString = connString;
                 }
-                catch (System.ArgumentException e)
+                catch (System.ArgumentException)
                 {
                     throw new ConnectionStringBuilderException();
                 }

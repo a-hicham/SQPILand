@@ -26,7 +26,7 @@
         <RadioButton x:Name="PostgreSQL" Content="PostgreSQL" HorizontalAlignment="Left" Margin="33,191,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="0" RenderTransformOrigin="0.509,2.4"/>
         <GroupBox x:Name="TechBox" Header="Datenbank" HorizontalAlignment="Left" Height="83" Margin="25,130,0,0" VerticalAlignment="Top" Width="96"/>
         <TextBox x:Name="SIDText" HorizontalAlignment="Left" Height="23" Margin="449,151,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="6"/>
-        <TextBox x:Name="PortText" HorizontalAlignment="Left" Height="23" Margin="449,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="52" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="7"/>
+        <TextBox x:Name="PortText" HorizontalAlignment="Left" Height="23" Margin="449,179,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="52" Text="1521" IsEnabled="{Binding IsChecked, ElementName=OracleDB}" KeyboardNavigation.TabIndex="7"/>
         <Label Content="SID" HorizontalAlignment="Left" Margin="413,145,0,0" VerticalAlignment="Top" Width="31" RenderTransformOrigin="0.521,0.268"/>
         <Label Content="Port" HorizontalAlignment="Left" Margin="412,175,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="ViewsCheckbox" Content="Views anzeigen" HorizontalAlignment="Left" Margin="579,460,0,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="12"/>
@@ -70,9 +70,10 @@
         <GroupBox Header="PostgreSQL Einstellungen" HorizontalAlignment="Left" Height="83" Margin="852,130,0,0" VerticalAlignment="Top" Width="206"/>
         <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="345" Margin="750,231,0,0" VerticalAlignment="Top" Width="3"/>
         <TextBox x:Name="Table_Blacklist_Text" HorizontalAlignment="Left" Height="23" Margin="413,362,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="305"/>
-        <GroupBox Header="Tabellen Blacklist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,340,0,0" VerticalAlignment="Top" Width="329"/>
+        <GroupBox Header="Tabellen Blocklist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,340,0,0" VerticalAlignment="Top" Width="329"/>
         <TextBox x:Name="Table_Whitelist_Text" HorizontalAlignment="Left" Height="23" Margin="413,415,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="305"/>
-        <GroupBox Header="Tabellen Whitelist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,393,0,0" VerticalAlignment="Top" Width="329"/>
+        <GroupBox Header="Tabellen Allowlist (separiert mit &quot;,&quot;)" HorizontalAlignment="Left" Height="53" Margin="401,393,0,0" VerticalAlignment="Top" Width="329"/>
+        <Button x:Name="folderChoose" Content="Verzeichnis auswählen" HorizontalAlignment="Left" Margin="920,378,0,0" VerticalAlignment="Top" Width="143" Click="Button_Click_3" IsEnabled="False"/>
 
     </Grid>
 </Window>

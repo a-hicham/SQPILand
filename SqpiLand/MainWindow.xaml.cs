@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
-
+using IWin32Window = System.Windows.Forms.IWin32Window;
+using System.Windows.Interop;
+using System.Linq;
 
 namespace SqpiLand
 {
@@ -16,6 +18,7 @@ namespace SqpiLand
     {
         IConnectionObject dbConn;
         Model.DBModel myModel;
+        IDictionary<string, string> DBs;
 
         public MainWindow()
         {
@@ -44,7 +47,8 @@ namespace SqpiLand
             //dbConn = OracleConn.GetInstance(ServerText.Text, PortText.Text, SIDText.Text, UsernameText.Text, PasswordText.Text);
             //DBList.Items.Add(ServerText.Text);
             //dbConn = DBConn.GetInstance(ServerText.Text, InitDbText.Text, (bool)TrustedCheckBox.IsChecked, !(bool)TrustedCheckBox.IsChecked ? UsernameText.Text : null, !(bool)TrustedCheckBox.IsChecked ? PasswordText.Text : null);
-            IList<string> Tables = dbConn.GetMetaDatabases();
+            DBs = dbConn.GetMetaDatabases();
+            IList<string> Tables = DBs.Keys.ToList();
             foreach (string db in Tables)
                 DBList.Items.Add(db);
         }
@@ -84,7 +88,7 @@ namespace SqpiLand
 
         private Model.DBModel createModel()
         {
-            return dbConn.BuildModel(DBList.SelectedItem.ToString(), (bool)WithHistory.IsChecked);
+            return dbConn.BuildModel(DBs[DBList.SelectedItem.ToString()], (bool)WithHistory.IsChecked);
         }
 
         private void XML_Export_Btn_Click(object sender, RoutedEventArgs e)
@@ -92,6 +96,31 @@ namespace SqpiLand
             myModel = createModel();
             XElement elements = Tools.Utils.ModelToXML(myModel);
             elements.Save(@"C:\Visio\" + myModel.serverName + ".xml");
+        }
+
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            IWin32Window win = new OldWindow(source.Handle);
+            System.Windows.Forms.DialogResult result = folderBrowserDialog.ShowDialog(win);
+        }
+
+        private class OldWindow : System.Windows.Forms.IWin32Window
+        {
+            private readonly System.IntPtr _handle;
+            public OldWindow(System.IntPtr handle)
+            {
+                _handle = handle;
+            }
+
+            #region IWin32Window Members
+            System.IntPtr System.Windows.Forms.IWin32Window.Handle
+            {
+                get { return _handle; }
+            }
+            #endregion
         }
     }
 }

@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Data.SqlClient;
+//using System.Data.SqlClient;
 using System.Windows;
 using System.Data;
 using System.Collections.Generic;
 using System.Data.Common;
 using Npgsql;
 using SqpiLand.Model;
-using Oracle.ManagedDataAccess.Client;
+//using Oracle.ManagedDataAccess.Client;
+using System.Linq;
 
 namespace SqpiLand
 {
-    class PostgreSqlConn : IConnectionObject
+    class PostgreSqlConn : AConnectionObject
     {
         private static readonly string DWTABLEOBJECTS = ".DWTABLEOBJECTS";
         private static readonly string DWFIELDS = ".DWFIELDS";
@@ -21,13 +22,14 @@ namespace SqpiLand
         private static DbConnectionStringBuilder dbConnStringBuilder = new DbConnectionStringBuilder();
         private static string serverName;
         private static string initDB;
-        private static bool trusted;
+        //private static bool trusted;
         private static string user = null;
         private static string pw = null;
         private static string connString;
-        private static DataTable dataTables;
-        private static DataTable dataFields;
-        private static DataTable dataRelations;
+        private static DataTable MetaDBs;
+        DbCommand sqlCommand;
+        DbDataAdapter sqlAdapter;
+        string command;
 
         private PostgreSqlConn()
         { }
@@ -63,13 +65,9 @@ namespace SqpiLand
             return instance;
         }
 
-        public IList<string> GetMetaDatabases()
+        public override IDictionary<string,string> GetMetaDatabases()
         {
-            //*******************************//
-            //ToDo: MetaDBs aus EntryDB holen//
-            //*******************************//
-
-            IList<string> TablesList = new List<string>();
+            IDictionary<string,string> TablesList = new Dictionary<string,string>();
             try
             {
                 conn.Open();
@@ -82,12 +80,32 @@ namespace SqpiLand
                         var dbConnString = "Server=" + serverName + ";Database=" + db[0] + ";User Id=" + user + ";Password=" + pw + ";";
                         dbConn = new NpgsqlConnection(dbConnString);
                         dbConn.Open();
-                        DataTable Tables = dbConn.GetSchema("Tables");
-                        foreach (DataRow table in Tables.Rows)
-                            if (table[2].ToString().Equals("massages") && !TablesList.Contains(table[0].ToString()))
-                                TablesList.Add(table[1].ToString());
-                        dbConn.Close();
-                        dbConn.Dispose();
+
+                        IEnumerable<DataRow> Tables = dbConn.GetSchema("Tables").Select().Where(e => e[2].ToString().ToLower().Equals("liodatabases"));
+
+                        command = "";
+
+                        foreach(DataRow table in Tables)
+                        {
+                            if (command != "")
+                                command += " UNION ";
+
+                            command += @"SELECT DBSYN_S, NAME_S FROM " + table[1] + "." + table[2] + @" WHERE DBNAME_S = 'MetaDB'";
+                        }
+
+                        if (command != "")
+                        {
+                            MetaDBs = new DataTable();
+
+                            sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
+                            sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
+                            sqlAdapter.Fill(MetaDBs);
+
+                            foreach (DataRow row in MetaDBs.Rows)
+                            {
+                                TablesList.Add(row[0].ToString(), row[1].ToString());
+                            }
+                        }
                     }
                 }
             }
@@ -106,98 +124,50 @@ namespace SqpiLand
             return TablesList;
         }
 
-        public DBModel BuildModel(string dbName, bool withHostory)
+        public override DBModel BuildModel(string dbName, bool withHostory)
         {
-            string command;
-            DbCommand sqlCommand;
-            DbDataAdapter sqlAdapter;
-            dataTables = new DataTable();
-            dataFields = new DataTable();
-            dataRelations = new DataTable();
-            List<Table> myTables = new List<Table>();
-            List<Field> myFields = new List<Field>();
-            FieldComparer fieldComparer = new FieldComparer();
-            List<Relation> myRelations = new List<Relation>();
-            HashSet<Field> relFields = new HashSet<Field>();
-
-            int k = 0;
-            foreach (Field f in myFields)
-            {
-                k++;
-            }
-
-            string connString = "Server=" + serverName + ";Database=" + initDB + ";User Id=" + user + ";Password=" + pw + ";";
-            DbConnection dbConn = new NpgsqlConnection(connString);
-            try
-            {
-                dbConn.Open();
-
-                command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
-                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
-                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
-
-                sqlAdapter.Fill(dataTables);
-
-                command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + DWFIELDS;
-                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
-                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
-                sqlAdapter.Fill(dataFields);
-
-                command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + DWRELATIONS;
-                sqlCommand = new NpgsqlCommand(command, (NpgsqlConnection)dbConn);
-                sqlAdapter = new NpgsqlDataAdapter((NpgsqlCommand)sqlCommand);
-                sqlAdapter.Fill(dataRelations);
-            }
-
-            catch (Exception e)
-            { }
-            finally
-            {
-                dbConn.Close();
-                dbConn.Dispose();
-            }
-
-            foreach (DataRow row in dataTables.Rows)
-            {
-                if (withHostory || !row[2].ToString().StartsWith(@"Änderungshistorie zu:"))
-                    myTables.Add(new Table(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString()));
-            }
-
-            foreach (DataRow row in dataFields.Rows)
-            {
-                var myTable = myTables.Find(table => table.Id == Convert.ToInt32(row[3]));
-                if (myTable != null)
+            var connString = "Server=" + serverName + ";Database=" + initDB + ";User Id=" + user + ";Password=" + pw + ";";
+            using (var dbConn = new NpgsqlConnection(connString))
+                try
                 {
-                    var myField = new Field(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), myTable, Convert.ToInt32(row[3].ToString()));
-                    myTable.Fields.Add(myField);
-                    myFields.Add(myField);
-                }
-                myTable?.Fields.Sort(fieldComparer);
-            }
+                    dbConn.Open();
 
-            foreach (DataRow row in dataRelations.Rows)
-            {
-                var myFieldFrom = myFields.Find(field => field.Id == Convert.ToInt32(row[1]));
-                var myFieldTo = myFields.Find(field => field.Id == Convert.ToInt32(row[2]));
-                relFields.Add(myFieldFrom);
-                relFields.Add(myFieldTo);
-                if (myFieldFrom != null && myFieldTo != null)
+                    var command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
+                    var dataTables = new DataTable();
+
+                    using (var sqlCommand = new NpgsqlCommand(command, dbConn))
+                    using (var sqlAdapter = new NpgsqlDataAdapter(sqlCommand))
+                        sqlAdapter.Fill(dataTables);
+
+
+                    command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + DWFIELDS;
+                    var dataFields = new DataTable();
+
+                    using (var sqlCommand = new NpgsqlCommand(command, dbConn))
+                    using (var sqlAdapter = new NpgsqlDataAdapter(sqlCommand))
+                        sqlAdapter.Fill(dataFields);
+
+
+                    command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + DWRELATIONS;
+                    var dataRelations = new DataTable();
+
+                    using (var sqlCommand = new NpgsqlCommand(command, dbConn))
+                    using (var sqlAdapter = new NpgsqlDataAdapter(sqlCommand))
+                        sqlAdapter.Fill(dataRelations);
+
+
+                    return CreateModel(dbName, withHostory, dataTables, dataFields, dataRelations);
+                }
+
+                catch (Exception e)
+                { }
+                finally
                 {
-                    //if(!myRelations.Exists(rel => rel.FromField.Id == myFieldTo.Id && rel.ToField.Id == myFieldFrom.Id))
-                    //    myRelations.Add(new Model.Relation(Convert.ToInt32(row[0]), myFieldFrom, myFieldTo, row[3].ToString()));
-
-                    if (!myRelations.Exists(rel => rel.FromField.Id == myFieldTo.Id && rel.ToField.Id == myFieldFrom.Id))
-                    {
-                        myRelations.Add(new Relation(Convert.ToInt32(row[0]), myFieldFrom, myFieldTo, row[3].ToString().Trim()));
-                    }
-                    else
-                    {
-                        myRelations.Find(rel => rel.FromField.Id == myFieldTo.Id && rel.ToField.Id == myFieldFrom.Id).TypeTo = row[3].ToString().Trim();
-                    }
+                    dbConn.Close();
+                    dbConn.Dispose();
                 }
-            }
 
-            return new DBModel(dbName, myTables, myRelations, relFields);
+            throw new ApplicationException();
         }
 
     }

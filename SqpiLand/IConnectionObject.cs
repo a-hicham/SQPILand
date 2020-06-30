@@ -2,7 +2,7 @@
 {
     internal interface IConnectionObject
     {
-        System.Collections.Generic.IList<string> GetMetaDatabases();
+        System.Collections.Generic.IDictionary<string,string> GetMetaDatabases();
         Model.DBModel BuildModel(string dbName, bool withHistory);
     }
 }

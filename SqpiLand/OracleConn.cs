@@ -6,34 +6,35 @@ using System.Windows;
 using System.Data;
 using System.Collections.Generic;
 using SqpiLand.Model;
+//using Microsoft.Office.Interop.Visio;
+using System.Linq;
+using Application = System.Windows.Application;
 
 namespace SqpiLand
 {
-    class OracleConn : IConnectionObject
+    class OracleConn : AConnectionObject
     {
-        private static readonly string DWTABLEOBJECTS = "DWTABLEOBJECTS";
-        private static readonly string DWFIELDS = "DWFIELDS";
-        private static readonly string DWRELATIONS = "DWRELATIONS";
+        private static readonly string DWTABLEOBJECTS = ".DWTABLEOBJECTS";
+        private static readonly string DWFIELDS = ".DWFIELDS";
+        private static readonly string DWRELATIONS = ".DWRELATIONS";
 
-        private static DbProviderFactory _dbFactory;
+        //private static DbProviderFactory _dbFactory;
         private static OracleConn instance = null;
         private static DbConnection conn;
         private static ConnectionStringBuilderOracle connStringBuilder;
-        //private static string user = null;
-        //private static string pw = null;
-        //private static string connString;
+        private static DataTable MetaDBs;
         private static DataTable dataTables;
         private static DataTable dataFields;
         private static DataTable dataRelations;
+        private string command;
 
-        private OracleConn()
-        { }
+        private OracleConn() {}
 
         public static OracleConn GetInstance(string server, string port, string SID, string username, string password, DbProviderFactory provider)
         {
             if (instance == null)
                 instance = new OracleConn();
-            _dbFactory = provider;
+//            _dbFactory = provider;
 
             try
             {
@@ -57,29 +58,37 @@ namespace SqpiLand
             var connectionString = @"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=" + connStringBuilder.Server + ")(PORT=" + 
                 connStringBuilder.Port + ")) (CONNECT_DATA=(SERVICE_NAME=" + connStringBuilder.Sid + "))); User Id=" + connStringBuilder.Username + 
                 ";Password=" + connStringBuilder.Password + ";";
-            var connection = new OracleConnection(connectionString);
-            return connection;
+
+            return new OracleConnection(connectionString);
         }
 
-        public IList<string> GetMetaDatabases()
+        public override IDictionary<string,string> GetMetaDatabases()
         {
-            IList<string> TablesList = new List<string>();
+            IDictionary<string,string> TablesList = new Dictionary<string,string>();
             try
             {
                 conn.Open();
-                // DataTable DBs = conn.GetSchema("Databases");
-                //OracleConnection dbConn;
-                //foreach (DataRow db in DBs.Rows)
-                //{
-                //    dbConn = new OracleConnection(connString);
-                //    dbConn.Open();
-                    DataTable Tables = conn.GetSchema("Tables");
-                    foreach (DataRow table in Tables.Rows)
-                        if (table[1].ToString().ToLower().Equals("massages") && !TablesList.Contains(table[0].ToString()))
-                            TablesList.Add(table[0].ToString());
-                   // conn.Close();
-                   // conn.Dispose();
-                //}
+
+                IEnumerable<DataRow> EntryDBs = conn.GetSchema("Tables").Select().Where(e => e.ItemArray[1].ToString().ToLower() == "liodatabases");
+                command = "";
+
+                foreach (DataRow table in EntryDBs)
+                {
+                    if (command != "")
+                        command += " UNION ";
+                    command += @"SELECT DBSYN_S, NAME_S FROM " + table[0] + "." + table[1] + @" WHERE DBNAME_S = 'MetaDB'";
+                }
+
+                MetaDBs = new DataTable();
+                OracleCommand sqlCommand = new OracleCommand(command, (OracleConnection)conn);
+                OracleDataAdapter sqlAdapter = new OracleDataAdapter(sqlCommand);
+                sqlAdapter.Fill(MetaDBs);
+
+
+                foreach(DataRow row in MetaDBs.Rows)
+                {
+                    TablesList.Add(row[0].ToString(), row[1].ToString());
+                }
             }
             catch (Exception e)
             {
@@ -96,95 +105,40 @@ namespace SqpiLand
             return TablesList;
         }
 
-        public DBModel BuildModel(string dbName, bool withHistory)
+        public override DBModel BuildModel(string dbName, bool withHistory)
         {
-            string command;
-            OracleCommand sqlCommand;
-            OracleDataAdapter sqlAdapter;
+            DbCommand sqlCommand;
+            DbDataAdapter sqlAdapter;
             dataTables = new DataTable();
             dataFields = new DataTable();
             dataRelations = new DataTable();
-            List<Table> myTables = new List<Table>();
-            List<Field> myFields = new List<Field>();
-            FieldComparer fieldComparer = new FieldComparer();
-            List<Relation> myRelations = new List<Relation>();
-            HashSet<Field> relFields = new HashSet<Field>();
 
             connStringBuilder.Username = ((MainWindow)Application.Current.MainWindow).UsernameText.Text;
             connStringBuilder.Password = ((MainWindow)Application.Current.MainWindow).PasswordText.Password;
            
             conn = GetConnection();
 
-            //string connString = "Server=" + serverName + ";Database=" + dbName + ";Trusted_Connection=" + trusted.ToString() + (trusted ? ";" : ";User Id=" + user + ";Password=" + pw + ";");
-            //SqlConnection dbConn = new SqlConnection(connString);
             conn.Open();
 
-            command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + "." + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
+            command = "SELECT TABLEOBJECTID_SL, TABLEOBJECT_S, LANGT49_S, KINDOFOBJECT_S, DBNAME_S FROM " + dbName + DWTABLEOBJECTS + " WHERE DBNAME_S != 'MetaDB'";
             sqlCommand = new OracleCommand(command, (OracleConnection)conn);
-            sqlAdapter = new OracleDataAdapter(sqlCommand);
+            sqlAdapter = new OracleDataAdapter((OracleCommand)sqlCommand);
             sqlAdapter.Fill(dataTables);
 
-            command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + "." + DWFIELDS;
+            command = "SELECT FIELDID_SL, FIELDNAME_S, LANGF49_S, TABLEOBJECTID_I, ORDERNR_SI FROM " + dbName + DWFIELDS;
             sqlCommand = new OracleCommand(command, (OracleConnection)conn);
-            sqlAdapter = new OracleDataAdapter(sqlCommand);
+            sqlAdapter = new OracleDataAdapter((OracleCommand)sqlCommand);
             sqlAdapter.Fill(dataFields);
 
-            command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + "." + DWRELATIONS;
+            command = "SELECT TA_ID_SL, FROMFIELDID_I, TOFIELDID_I, RELATIONTYPE_S FROM " + dbName + DWRELATIONS;
             sqlCommand = new OracleCommand(command, (OracleConnection)conn);
-            sqlAdapter = new OracleDataAdapter(sqlCommand);
+            sqlAdapter = new OracleDataAdapter((OracleCommand)sqlCommand);
             sqlAdapter.Fill(dataRelations);
 
             conn.Close();
             conn.Dispose();
 
-            foreach (DataRow row in dataTables.Rows)
-            {
-                if (withHistory || !row[2].ToString().StartsWith(@"Änderungshistorie zu:"))
-                    myTables.Add(new Table(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString()));
-            }
-
-            foreach (DataRow row in dataFields.Rows)
-            {
-                Table myTable = myTables.Find(table => table.Id == Convert.ToInt32(row[3]));
-                if (myTable != null)
-                {
-                    Field myField = new Field(Convert.ToInt32(row[0]), row[1].ToString(), row[2].ToString(), myTable,
-                        Convert.ToInt32(row[4].ToString()));
-                    myTable.Fields.Add(myField);
-                    myFields.Add(myField);
-                }
-                myTable?.Fields.Sort(fieldComparer);
-            }
-
-
-            foreach (DataRow row in dataRelations.Rows)
-            {
-                Field myFieldFrom = myFields.Find(field => field.Id == Convert.ToInt32(row[1]));
-                Field myFieldTo = myFields.Find(field => field.Id == Convert.ToInt32(row[2]));
-                relFields.Add(myFieldFrom);
-                relFields.Add(myFieldTo);
-                if (myFieldFrom != null && myFieldTo != null)
-                {
-                    if (!myRelations.Exists(rel => rel.FromField.Id == myFieldTo.Id && rel.ToField.Id == myFieldFrom.Id))
-                    {
-                        myRelations.Add(new Relation(Convert.ToInt32(row[0]), myFieldFrom, myFieldTo, row[3].ToString().Trim()));
-                    }
-                    else
-                    {
-                        myRelations.Find(rel => rel.FromField.Id == myFieldTo.Id && rel.ToField.Id == myFieldFrom.Id).TypeTo = row[3].ToString().Trim();
-                    }
-                }
-            }
-
-            //foreach(Relation relation in myRelations)
-            //{
-            //    Relation rel1 = myRelations.Find(rel => rel.ToField.Id == relation.FromField.Id && rel.FromField.Id == relation.ToField.Id);
-            //    relation.TypeTo = rel1.TypeFrom;
-            //    myRelations.Remove(rel1);
-            //}
-
-
-            return new DBModel(dbName, myTables, myRelations, relFields);
+            return CreateModel(dbName, withHistory, dataTables, dataFields, dataRelations);
         }
     }
 }

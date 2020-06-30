@@ -38,7 +38,7 @@ namespace SqpiLand
                     MessageBox.Show(@"Bitte Fokus-Tabelle eingeben oder Fokus deaktivieren.");
                     return;
                 }
-                if (!model.TablesList.Exists(tab => tab.Name.Equals(fokusTable)))
+                if (!model.TablesList.Exists(tab => tab.Name.ToLower().Equals(fokusTable.ToLower())))
                 {
                     MessageBox.Show(@"Fokus-Tabelle " + fokusTable + " nicht gefunden.");
                     return;
@@ -54,6 +54,7 @@ namespace SqpiLand
             {
                 var x = -5;
                 var y = 11;
+                // ToDo: erst berechnen nach Fokus
                 var breite = (int)Math.Sqrt(model.TablesList.Count);
                 var hoehe = 0;
                 var counter = 0;
@@ -91,8 +92,8 @@ namespace SqpiLand
                     model.RelationsList.FindAll(rel => 
                             //!rel.FromField.Table.Name.ToLower().Equals(mandanten) &&
                             //!rel.ToField.Table.Name.ToLower().Equals(mandanten) &&
-                            (rel.FromField.Table.Name.ToLower().Equals(fokusTable) ||
-                            rel.ToField.Table.Name.ToLower().Equals(fokusTable)))
+                            (rel.FromField.Table.Name.ToLower().Equals(fokusTable.ToLower()) ||
+                            rel.ToField.Table.Name.ToLower().Equals(fokusTable.ToLower())))
                         .ForEach(rel =>
                             {
                                 TablesToLeaveList.Add(rel.FromField.Table);

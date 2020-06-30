@@ -4,20 +4,14 @@
     {
         public enum DBArts
         {
-            MSSQL, ORACLE
+            MSSQL, ORACLE, POSTGRES
         }
 
-        private DBArts art;
-        private string server;
-        private string username;
-        private string password;
-        private string baseDB;
-
-        public string Server { get => server; set => server = value; }
-        public string BaseDB { get => baseDB; set => baseDB = value; }
-        public string Username { get => username; set => username = value; }
-        public string Password { get => password; set => password = value; }
-        public DBArts Art { get => art; set => art = value; }
+        public string Server { get; set; }
+        public string BaseDB { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public DBArts Art { get; set; }
 
         protected ConnectionStringBuilderBase(string server, string baseDB, string username, string password)
         {
