@@ -76,7 +76,7 @@ namespace SqpiLand
                 {
                     if (command != "")
                         command += " UNION ";
-                    command += @"SELECT DBSYN_S, NAME_S FROM " + table[0] + "." + table[1] + @" WHERE DBNAME_S = 'MetaDB'";
+                    command += @"SELECT DBSYN_S, NAME_S, '" + table[0] + "' FROM " + table[0] + "." + table[1] + @" WHERE DBNAME_S = 'MetaDB'";
                 }
 
                 MetaDBs = new DataTable();
@@ -87,7 +87,7 @@ namespace SqpiLand
 
                 foreach(DataRow row in MetaDBs.Rows)
                 {
-                    TablesList.Add(row[0].ToString(), row[1].ToString());
+                    TablesList.Add(row[0].ToString() + " (" + row[2].ToString() + ")", row[1].ToString());
                 }
             }
             catch (Exception e)

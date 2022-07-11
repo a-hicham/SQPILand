@@ -65,11 +65,10 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>CE20DFC9C13287A6C8B827283AA54B2CCF60F52F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>7021068CC14CED83B91BE6DD351CFD19F4BC8F3A</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>SqpiLand_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
@@ -181,6 +180,7 @@
     </None>
     <None Include="Resources\SLModel.vsdx" />
     <None Include="SqpiLand_1_TemporaryKey.pfx" />
+    <None Include="SqpiLand_2_TemporaryKey.pfx" />
     <None Include="SqpiLand_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

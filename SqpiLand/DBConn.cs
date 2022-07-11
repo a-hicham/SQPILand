@@ -94,7 +94,7 @@ namespace SqpiLand
                     {
                         if (command != "")
                             command += " UNION ";
-                        command += @"SELECT DBSYN_S, NAME_S FROM " + table[0] + "." + table[1] + "." + table[2] + @" WHERE DBNAME_S = 'MetaDB'";
+                        command += @"SELECT DBSYN_S, NAME_S, " + table[0] + " FROM " + table[0] + "." + table[1] + "." + table[2] + @" WHERE DBNAME_S = 'MetaDB'";
                     }
 
                     if(command != "")
@@ -107,10 +107,9 @@ namespace SqpiLand
 
                         foreach (DataRow row in MetaDBs.Rows)
                         {
-                            TablesList.Add(row[0].ToString(), row[1].ToString());
+                            TablesList.Add(row[0].ToString() + " (" + row[2].ToString() + ")", row[1].ToString());
                         }
                     }
-
 
                     /*
                     foreach (DataRow table in Tables.Rows)
@@ -125,7 +124,7 @@ namespace SqpiLand
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
+                MessageBox.Show("Exception @GetMetaDatabases: " + e.Message);
             }
             finally
             {
